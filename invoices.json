@@ -1,0 +1,23 @@
+{
+  "12": {
+    "total": 1,
+    "products": [
+      {
+        "id": 13,
+        "invoice_id": 12,
+        "product_id": null,
+        "description": "a",
+        "total": "1.00",
+        "created_at": "2024-10-05T17:54:22.000000Z",
+        "updated_at": "2024-10-05T17:54:22.000000Z",
+        "price": "1.00",
+        "name": "a",
+        "discount": 0,
+        "quantity": 1,
+        "product": null
+      }
+    ],
+    "invoice_id": 12,
+    "paymentLink": "https://www.youtube.com/watch?v=5mRbdtrKFy4&t=37s"
+  }
+}
