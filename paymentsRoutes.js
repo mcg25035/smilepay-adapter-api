@@ -78,7 +78,7 @@ class PaymentRoutes {
          * @desc Updates the convenience store for an invoice.
          * @access Public
          */
-        this.app.put('/pay', (req, res) => {
+        this.app.put('/pay', async (req, res) => {
             const { invoice_id, convenience_store } = req.body;
 
             if (!invoice_id || !convenience_store) {
