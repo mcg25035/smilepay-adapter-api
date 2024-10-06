@@ -50,7 +50,7 @@ class PaymentRequest {
      */
     async generatePaymentCode() {
         const Od_sob = `mctw${this.invoice.invoice_id}`;
-        const Pay_zg = 0;
+        const Pay_zg = this.convinientStore;
         const Data_id = this.invoice.invoice_id;
         const Amount = this.invoice.total;
 
