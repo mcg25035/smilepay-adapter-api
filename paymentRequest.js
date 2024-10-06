@@ -58,6 +58,7 @@ class PaymentRequest {
         try {
             const response = await axios.get(url);
             const xmlData = response.data;
+            console.log(xmlData)
 
             let ibonNo, famiNo;
 
