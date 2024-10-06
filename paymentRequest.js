@@ -50,11 +50,14 @@ class PaymentRequest {
      */
     async generatePaymentCode() {
         const Od_sob = `mctw${this.invoice.invoice_id}`;
+        const Verify_key = this.verify_key;
         const Pay_zg = this.convinientStore;
         const Data_id = this.invoice.invoice_id;
         const Amount = this.invoice.total;
 
-        const url = `https://ssl.smse.com.tw/api/SPPayment.asp?Dcvc=${encodeURIComponent(this.Dcvc)}&Rvg2c=${encodeURIComponent(this.Rvg2c)}&Verify_key=${this.verify_key}&Od_sob=${encodeURIComponent(Od_sob)}&Pay_zg=${encodeURIComponent(Pay_zg)}&Amount=${encodeURIComponent(Amount)}&Pur_name=${encodeURIComponent(this.Pur_name)}&Mobile_number=${encodeURIComponent(this.Mobile_number)}&Email=${encodeURIComponent(this.Email)}&Roturl=${encodeURIComponent(this.Roturl)}&Roturl_status=${encodeURIComponent(this.Roturl_status)}&Data_id=${encodeURIComponent(Data_id)}`;
+        console.log(Verify_key)
+
+        const url = `https://ssl.smse.com.tw/api/SPPayment.asp?Dcvc=${encodeURIComponent(this.Dcvc)}&Rvg2c=${encodeURIComponent(this.Rvg2c)}&Verify_key=${encodeURIComponent(this.Verify_key)}&Od_sob=${encodeURIComponent(Od_sob)}&Pay_zg=${encodeURIComponent(Pay_zg)}&Amount=${encodeURIComponent(Amount)}&Pur_name=${encodeURIComponent(this.Pur_name)}&Mobile_number=${encodeURIComponent(this.Mobile_number)}&Email=${encodeURIComponent(this.Email)}&Roturl=${encodeURIComponent(this.Roturl)}&Roturl_status=${encodeURIComponent(this.Roturl_status)}&Data_id=${encodeURIComponent(Data_id)}`;
         try {
             const response = await axios.get(url);
             const xmlData = response.data;
