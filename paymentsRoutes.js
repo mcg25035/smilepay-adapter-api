@@ -55,7 +55,7 @@ class PaymentRoutes {
                 return res.status(200).json({ paymentLink: existingInvoice.paymentLink });
             }
 
-            const paymentLink = `https://www.youtube.com/watch?v=5mRbdtrKFy4&t=37s`;
+            const paymentLink = `${process.env.FRONTEND_URL}/${invoice_id}`;
 
             const newInvoice = {
                 total,
