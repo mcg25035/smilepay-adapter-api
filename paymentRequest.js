@@ -74,8 +74,9 @@ class PaymentRequest {
             
 
             let xmlReceived = await parseString(xmlData);
-            ibonNo = xmlReceived?.smilepay?.IbonNo;
-            famiNo = xmlReceived?.smilepay?.FamiNo;
+            console.log(xmlReceived)
+            ibonNo = xmlReceived?.SmilePay?.IbonNo;
+            famiNo = xmlReceived?.SmilePay?.FamiNo;
 
 
             if (ibonNo) return ibonNo;
