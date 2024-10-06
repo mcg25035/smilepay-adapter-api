@@ -49,15 +49,20 @@ class PaymentRequest {
      * @returns {string} The constructed payment code.
      */
     async generatePaymentCode() {
+        const Dcvc = this.dcvc;
+        const Rvg2c = this.rvg2c;
         const Od_sob = `mctw${this.invoice.invoice_id}`;
-        const Verify_key = this.verify_key;
         const Pay_zg = this.convinientStore;
         const Data_id = this.invoice.invoice_id;
         const Amount = this.invoice.total;
+        const Pur_name = this.pur_name;
+        const Mobile_number = this.mobile_number;
+        const Email = this.email;
+        const Roturl = this.roturl;
+        const Roturl_status = this.roturl_status;
+        const Verify_key = this.verify_key;
 
-        console.log(Verify_key)
-
-        const url = `https://ssl.smse.com.tw/api/SPPayment.asp?Dcvc=${encodeURIComponent(this.Dcvc)}&Rvg2c=${encodeURIComponent(this.Rvg2c)}&Verify_key=${encodeURIComponent(this.Verify_key)}&Od_sob=${encodeURIComponent(Od_sob)}&Pay_zg=${encodeURIComponent(Pay_zg)}&Amount=${encodeURIComponent(Amount)}&Pur_name=${encodeURIComponent(this.Pur_name)}&Mobile_number=${encodeURIComponent(this.Mobile_number)}&Email=${encodeURIComponent(this.Email)}&Roturl=${encodeURIComponent(this.Roturl)}&Roturl_status=${encodeURIComponent(this.Roturl_status)}&Data_id=${encodeURIComponent(Data_id)}`;
+        const url = `https://ssl.smse.com.tw/api/SPPayment.asp?Dcvc=${Dcvc}&Rvg2c=${Rvg2c}&Verify_key=${Verify_key}&Od_sob=${Od_sob}&Pay_zg=${Pay_zg}&Amount=${Amount}&Pur_name=${Pur_name}&Mobile_number=${Mobile_number}&Email=${Email}&Roturl=${Roturl}&Roturl_status=${Roturl_status}&Data_id=${Data_id}`;
         try {
             const response = await axios.get(url);
             const xmlData = response.data;
