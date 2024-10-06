@@ -2,6 +2,7 @@
 
 const { default: axios } = require('axios');
 const { response } = require('express');
+var parseString = require('xml2js').parseString;
 
 require('dotenv').config(); // Load environment variables
 
@@ -59,6 +60,8 @@ class PaymentRequest {
             const xmlData = response.data;
 
             let ibonNo, famiNo;
+
+            
 
             parseString(xmlData, (err, result) => {
                 if (err) {
