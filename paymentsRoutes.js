@@ -4,6 +4,12 @@ const cors = require('cors');
 require('dotenv').config();
 
 class PaymentRoutes {
+    /** @type {express.Application} */
+    app;
+    /** @type {import('./invoiceManager')} */
+    invoiceManager;
+    /** @type {import('./convinientStores').convinientStores} */
+    convinientStores;
     /**
      * Creates an instance of PaymentRoutes.
      * @param {express.Application} app - The Express app instance.
@@ -35,7 +41,7 @@ class PaymentRoutes {
          * @access Public
          */
         this.app.post('/pay', (req, res) => {
-            const { total, products, invoice_id } = req.body;
+            const { total, products, invoice_id, name, email } = req.body;
 
             if (!invoice_id) {
                 console.log('Received payment data without invoice_id:', req.body);
@@ -54,6 +60,8 @@ class PaymentRoutes {
                 total,
                 products,
                 invoice_id,
+                name,
+                email,
                 paymentLink,
                 convenience_store: null,
                 store_set_time: null
@@ -82,6 +90,7 @@ class PaymentRoutes {
                 return res.status(400).json({ error: 'Invalid convenience_store' });
             }
 
+            /** @type {import('./invoiceManager').Invoice} */
             const invoice = this.invoiceManager.getInvoice(invoice_id);
             if (!invoice) {
                 console.log(`Invoice ID ${invoice_id} does not exist.`);
