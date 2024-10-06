@@ -65,7 +65,8 @@ class InvoiceManager {
      * @returns {Invoice|null} The invoice if found, otherwise null.
      */
     getInvoice(invoice_id) {
-        return this.invoiceMap[invoice_id] || null;
+        if (!this.invoiceMap[invoice_id]) return null;
+        return { ...this.invoiceMap[invoice_id] };
     }
 
     /**
