@@ -88,6 +88,8 @@ class PaymentRequest {
             console.log(xmlReceived?.SmilePay)
             console.log(xmlReceived?.SmilePay?.IbonNO)
             console.log(xmlReceived?.SmilePay?.FamiNO)
+            console.log(typeof(xmlReceived?.SmilePay?.IbonNO))
+            console.log(typeof(xmlReceived?.SmilePay?.FamiNO))
             console.log(xmlReceived?.SmilePay?.IbonNO[0])
             console.log(xmlReceived?.SmilePay?.FamiNO[0])
             ibonNo = xmlReceived?.SmilePay?.IbonNO[0];
