@@ -92,7 +92,7 @@ class PaymentRoutes {
             }
 
             /** @type {import('./invoiceManager').Invoice} */
-            const invoice = this.invoiceManager.getInvoice(invoice_id);
+            let invoice = this.invoiceManager.getInvoice(invoice_id);
             if (!invoice) {
                 console.log(`Invoice ID ${invoice_id} does not exist.`);
                 return res.status(404).json({ error: 'Invoice not found' });
@@ -109,8 +109,7 @@ class PaymentRoutes {
             };
             this.invoiceManager.updateInvoice(invoice_id, updates);
 
-            console.log(this.convinientStores[convenience_store])
-
+            invoice = this.invoiceManager.getInvoice(invoice_id);
             const code = await (new PaymentRequest(invoice)).generatePaymentCode();
             updates = {
                 code
