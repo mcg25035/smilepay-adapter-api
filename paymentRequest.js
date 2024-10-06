@@ -73,13 +73,10 @@ class PaymentRequest {
 
             
 
-            parseString(xmlData, (err, result) => {
-                if (err) {
-                    throw new Error('Failed to parse XML');
-                }
-                ibonNo = result?.response?.IbonNo?.[0];
-                famiNo = result?.response?.FamiNo?.[0];
-            });
+            let xmlReceived = await parseString(xmlData);
+            ibonNo = xmlReceived?.smilepay?.IbonNo;
+            famiNo = xmlReceived?.smilepay?.FamiNo;
+
 
             if (ibonNo) return ibonNo;
             if (famiNo) return famiNo;
