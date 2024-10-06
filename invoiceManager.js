@@ -9,7 +9,8 @@ const path = require('path');
  * @property {object[]} products - List of products in the invoice
  * @property {string} invoice_id - Unique identifier for the invoice
  * @property {string} paymentLink - Payment link for the invoice
- * @property {string|null} convenience_store - Convenience store for payment
+ * @property {string} code - Payment code for the invoice
+ * @property {number|null} convenience_store - Convenience store for payment
  * @property {string|null} store_set_time - Time when convenience store was set
  * @property {string} name - Name of the customer
  * @property {string} email - Email of the customer

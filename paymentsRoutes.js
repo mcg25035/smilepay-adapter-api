@@ -1,6 +1,7 @@
 // File paymentsRoutes.js start
 
 const cors = require('cors');
+const PaymentRequest = require('./paymentRequest');
 require('dotenv').config();
 
 class PaymentRoutes {
@@ -102,9 +103,12 @@ class PaymentRoutes {
                 return res.status(403).json({ error: 'Convenience_store has already been set and cannot be changed' });
             }
 
+            const code = await (new PaymentRequest(invoice)).generatePaymentCode();
+
             const updates = {
-                convenience_store: convenience_store,
-                store_set_time: new Date().toISOString()
+                convenience_store: this.convinientStores[convenience_store],
+                store_set_time: new Date().toISOString(),
+                code
             };
 
             this.invoiceManager.updateInvoice(invoice_id, updates);
@@ -132,6 +136,9 @@ class PaymentRoutes {
                 console.log(`Invoice ID ${invoice_id} does not exist.`);
                 return res.status(404).json({ error: 'Invoice not found' });
             }
+
+            delete invoice.name;
+            delete invoice.email;
 
             console.log(`Retrieved data for invoice_id ${invoice_id}:`, invoice);
             return res.status(200).json(invoice);
