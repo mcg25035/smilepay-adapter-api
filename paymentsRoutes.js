@@ -109,6 +109,8 @@ class PaymentRoutes {
             };
             this.invoiceManager.updateInvoice(invoice_id, updates);
 
+            console.log(this.convinientStores[convenience_store])
+
             const code = await (new PaymentRequest(invoice)).generatePaymentCode();
             updates = {
                 code
