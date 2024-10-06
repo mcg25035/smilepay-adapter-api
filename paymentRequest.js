@@ -55,13 +55,14 @@ class PaymentRequest {
 
     /**
      * Generates the payment code from SmilePay API
+     * @param {number} payZg - The convinient store code.
      * @returns {string} The constructed payment code.
      */
-    async generatePaymentCode() {
+    async generatePaymentCode(payZg) {
         const Dcvc = this.dcvc;
         const Rvg2c = this.rvg2c;
         const Od_sob = `mctw${this.invoice.invoice_id}`;
-        const Pay_zg = this.convinientStore;
+        const Pay_zg = payZg;
         const Data_id = this.invoice.invoice_id;
         const Amount = this.invoice.total;
         const Pur_name = this.pur_name;
@@ -75,7 +76,7 @@ class PaymentRequest {
         try {
             const response = await axios.get(url);
             const xmlData = response.data;
-            console.log(Pay_zg)
+            console.log(payZg)
             console.log(xmlData)
 
             let ibonNo, famiNo;
