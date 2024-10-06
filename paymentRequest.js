@@ -76,16 +76,9 @@ class PaymentRequest {
         try {
             const response = await axios.get(url);
             const xmlData = response.data;
-            console.log(payZg)
-            console.log(xmlData)
-
-            let ibonNo, famiNo;
-
-            
-
             let xmlReceived = await promisesParser(xmlData);
-            ibonNo = xmlReceived?.SmilePay?.IbonNO;
-            famiNo = xmlReceived?.SmilePay?.FamiNO;
+            let ibonNo = xmlReceived?.SmilePay?.IbonNo;
+            let famiNo = xmlReceived?.SmilePay?.FamiNO;
 
 
             if (ibonNo) return ibonNo[0];
