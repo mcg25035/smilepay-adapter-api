@@ -21,7 +21,7 @@ class PaymentRoutes {
         const allowedOrigin = process.env.ALLOWED_ORIGIN || '*';
 
         const corsOptions = {
-            origin: allowedOrigin, 
+            origin: allowedOrigin,
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
             allowedHeaders: ['Content-Type', 'Authorization'],
             credentials: true,
@@ -88,16 +88,9 @@ class PaymentRoutes {
                 return res.status(404).json({ error: 'Invoice not found' });
             }
 
-            if (invoice.convenience_store && invoice.store_set_time) {
-                const oneHour = 60 * 60 * 1000;
-                const currentTime = new Date();
-                const storeSetTime = new Date(invoice.store_set_time);
-                const timeDifference = currentTime - storeSetTime;
-
-                if (timeDifference < oneHour) {
-                    console.log(`Invoice ID ${invoice_id} has been set with a convenience_store within the last hour.`);
-                    return res.status(403).json({ error: 'Cannot change convenience_store within 1 hour of setting' });
-                }
+            if (invoice.convenience_store) {
+                console.log(`Invoice ID ${invoice_id} already has a convenience_store set.`);
+                return res.status(403).json({ error: 'Convenience_store has already been set and cannot be changed' });
             }
 
             const updates = {
@@ -110,6 +103,7 @@ class PaymentRoutes {
             console.log(`Updated convenience_store for invoice_id ${invoice_id} to ${convenience_store}.`);
             return res.status(200).json({ status: 'convenience_store updated successfully' });
         });
+
 
         /**
          * @route GET /pay/:invoice_id
