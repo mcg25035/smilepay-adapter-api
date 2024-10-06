@@ -1,7 +1,7 @@
 // File paymentsRoutes.js start
 
 const cors = require('cors');
-require('dotenv').config(); 
+require('dotenv').config();
 
 class PaymentRoutes {
     /**
@@ -18,14 +18,13 @@ class PaymentRoutes {
     }
 
     setupRoutes() {
-        const allowedOrigins = process.env.ALLOWED_ORIGINS
-            ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
-            : [];
+        const allowedOrigin = process.env.ALLOWED_ORIGIN || '*';
 
         const corsOptions = {
-            origin: allowedOrigins,
+            origin: allowedOrigin, 
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-            allowedHeaders: ['Content-Type', 'Authorization']
+            allowedHeaders: ['Content-Type', 'Authorization'],
+            credentials: true,
         };
 
         this.app.use('/pay', cors(corsOptions));
