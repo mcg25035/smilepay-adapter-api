@@ -84,20 +84,12 @@ class PaymentRequest {
             
 
             let xmlReceived = await promisesParser(xmlData);
-            console.log(xmlReceived)
-            console.log(xmlReceived?.SmilePay)
-            console.log(xmlReceived?.SmilePay?.IbonNO)
-            console.log(xmlReceived?.SmilePay?.FamiNO)
-            console.log(typeof(xmlReceived?.SmilePay?.IbonNO))
-            console.log(typeof(xmlReceived?.SmilePay?.FamiNO))
-            console.log(xmlReceived?.SmilePay?.IbonNO[0])
-            console.log(xmlReceived?.SmilePay?.FamiNO[0])
-            ibonNo = xmlReceived?.SmilePay?.IbonNO[0];
-            famiNo = xmlReceived?.SmilePay?.FamiNO[0];
+            ibonNo = xmlReceived?.SmilePay?.IbonNO;
+            famiNo = xmlReceived?.SmilePay?.FamiNO;
 
 
-            if (ibonNo) return ibonNo;
-            if (famiNo) return famiNo;
+            if (ibonNo) return ibonNo[0];
+            if (famiNo) return famiNo[0];
             throw new Error('Failed to generate payment code');
 
             
