@@ -86,8 +86,8 @@ class PaymentRequest {
             let xmlReceived = await promisesParser(xmlData);
             console.log(xmlReceived)
             console.log(xmlReceived?.SmilePay)
-            console.log(xmlReceived?.SmilePay?.IbonNo)
-            console.log(xmlReceived?.SmilePay?.FamiNo)
+            console.log(xmlReceived?.SmilePay?.IbonNO)
+            console.log(xmlReceived?.SmilePay?.FamiNO)
             ibonNo = xmlReceived?.SmilePay?.IbonNO[0];
             famiNo = xmlReceived?.SmilePay?.FamiNO[0];
 
