@@ -2,9 +2,18 @@
 
 const { default: axios } = require('axios');
 const { response } = require('express');
-var parseString = require('xml2js').parseString;
+var xml2jsParser = require('xml2js').parseString;
 
 require('dotenv').config(); // Load environment variables
+
+function promisesParser(string){
+    return new Promise(function(resolve, reject){
+        xml2jsParser(string, function(err, result) {
+            if (err) return reject(err);
+            return resolve(result);
+        });
+    });
+}
 
 class PaymentRequest {
     /** @type {string} */
@@ -73,10 +82,9 @@ class PaymentRequest {
 
             
 
-            let xmlReceived = await parseString(xmlData);
-            console.log(xmlReceived)
-            ibonNo = xmlReceived?.SmilePay?.IbonNo;
-            famiNo = xmlReceived?.SmilePay?.FamiNo;
+            let xmlReceived = await promisesParser(xmlData);
+            ibonNo = xmlReceived?.SmilePay?.IbonNo[0];
+            famiNo = xmlReceived?.SmilePay?.FamiNo[0];
 
 
             if (ibonNo) return ibonNo;

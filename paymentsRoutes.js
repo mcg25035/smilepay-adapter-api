@@ -103,17 +103,20 @@ class PaymentRoutes {
                 return res.status(403).json({ error: 'Convenience_store has already been set and cannot be changed' });
             }
 
-            let updates = {
-                convenience_store: this.convinientStores[convenience_store],
-                store_set_time: new Date().toISOString()
-            };
-            this.invoiceManager.updateInvoice(invoice_id, updates);
-
-            invoice = this.invoiceManager.getInvoice(invoice_id);
-            const code = await (new PaymentRequest(invoice)).generatePaymentCode();
-            updates = {
-                code
+            let code;
+            try{
+                code = await (new PaymentRequest(invoice)).generatePaymentCode(this.convinientStores[convenience_store]);
             }
+            catch(err){
+                console.error('Error generating payment code:', err);
+                return res.status(500).json({ error: 'Error generating payment code' });
+            }
+            
+            let updates = {
+                convenience_store: convenience_store,
+                store_set_time: new Date().toISOString(),
+                code
+            };
             this.invoiceManager.updateInvoice(invoice_id, updates);
 
             console.log(`Updated convenience_store for invoice_id ${invoice_id} to ${convenience_store}.`);
