@@ -103,14 +103,16 @@ class PaymentRoutes {
                 return res.status(403).json({ error: 'Convenience_store has already been set and cannot be changed' });
             }
 
-            const code = await (new PaymentRequest(invoice)).generatePaymentCode();
-
-            const updates = {
+            let updates = {
                 convenience_store: this.convinientStores[convenience_store],
-                store_set_time: new Date().toISOString(),
-                code
+                store_set_time: new Date().toISOString()
             };
+            this.invoiceManager.updateInvoice(invoice_id, updates);
 
+            const code = await (new PaymentRequest(invoice)).generatePaymentCode();
+            updates = {
+                code
+            }
             this.invoiceManager.updateInvoice(invoice_id, updates);
 
             console.log(`Updated convenience_store for invoice_id ${invoice_id} to ${convenience_store}.`);
