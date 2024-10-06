@@ -23,33 +23,12 @@ class PaymentRoutes {
             : [];
 
         const corsOptions = {
-            origin: function (origin, callback) {
-                if (!origin) return callback(null, true);
-                if (allowedOrigins.indexOf(origin) !== -1) {
-                    callback(null, true);
-                } else {
-                    callback(new Error('不允許的 CORS 請求來源'));
-                }
-            },
+            origin: allowedOrigins,
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
             allowedHeaders: ['Content-Type', 'Authorization']
         };
 
-        /**
-         * 中介軟體函數來處理 CORS 錯誤
-         */
-        const handleCorsError = (err, req, res, next) => {
-            if (err instanceof Error && err.message === '不允許的 CORS 請求來源') {
-                res.status(403).json({ error: '不允許的 CORS 請求來源' });
-            } else {
-                next(err);
-            }
-        };
-
-        /**
-         * 應用 CORS 中介軟體到所有 /pay 路由
-         */
-        this.app.use('/pay', cors(corsOptions), handleCorsError);
+        this.app.use('/pay', cors(corsOptions));
 
         /**
          * @route POST /pay
