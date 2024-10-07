@@ -46,7 +46,7 @@ class PaymentRequest {
         const Rvg2c = process.env.RVG2C;
         const Verify_key = process.env.VERIFY_KEY;
         const Od_sob_prefix = process.env.OD_SOB_PREFIX;
-        const Roturl = process.env.SELF_URL;
+        const Roturl = `${process.env.SELF_URL}/api/smilepay/pay`;
         const Roturl_status = "SmilepayPaid";
         const Od_sob = encodeURIComponent(`${Od_sob_prefix}${this.invoice.invoice_id}`);
         const Pay_zg = payZg;
