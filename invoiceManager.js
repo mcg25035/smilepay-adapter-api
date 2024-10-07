@@ -79,6 +79,15 @@ class InvoiceManager {
     }
 
     /**
+     * Adds a new invoice.
+     * @param {string} invoice_id - The invoice to add.
+     */
+    deleteInvoice(invoice_id) {
+        if (!this.invoiceMap[invoice_id]) throw new Error('Invoice not found');
+        delete this.invoiceMap[invoice_id];
+    }
+
+    /**
      * Updates an existing invoice.
      * @param {string} invoice_id - The ID of the invoice to update.
      * @param {Partial<Invoice>} updates - The fields to update.

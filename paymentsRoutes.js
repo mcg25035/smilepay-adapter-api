@@ -1,11 +1,17 @@
 // File paymentsRoutes.js start
 
 const cors = require('cors');
+const bodyParser = require('body-parser');
 const PaymentRequest = require('./paymentRequest');
+const { getMidSmilePay } = require('./utils');
+const { default: axios } = require('axios');
+const InvoiceManager = require('./invoiceManager');
 require('dotenv').config();
 
+/** @typedef {import('express').Application} ExpressApp */
+
 class PaymentRoutes {
-    /** @type {express.Application} */
+    /** @type {ExpressApp} */
     app;
     /** @type {import('./invoiceManager')} */
     invoiceManager;
@@ -13,7 +19,7 @@ class PaymentRoutes {
     convinientStores;
     /**
      * Creates an instance of PaymentRoutes.
-     * @param {express.Application} app - The Express app instance.
+     * @param {ExpressApp} app - The Express app instance.
      * @param {InvoiceManager} invoiceManager - The InvoiceManager instance.
      * @param {import('./convinientStores')} convinientStores - The object containing allowed convenience stores.
      */
@@ -34,7 +40,9 @@ class PaymentRoutes {
             credentials: true,
         };
 
+    
         this.app.use('/pay', cors(corsOptions));
+        this.app.use('/api/smilepay/pay', bodyParser.urlencoded({ extended: true }));
 
         /**
          * @route POST /pay
@@ -42,7 +50,17 @@ class PaymentRoutes {
          * @access Public
          */
         this.app.post('/pay', (req, res) => {
-            const { total, products, invoice_id, name, email } = req.body;
+            /** @type {InvoiceManager.Invoice} */
+            const requestBody = req.body;
+            let { total, products, invoice_id, name, email } = requestBody;
+
+            total += 35;
+
+            products.push({
+                "price" : 35,
+                "quantity" : 1,
+                "name" : "SmilePay手續費"
+            });
 
             if (!invoice_id) {
                 console.log('Received payment data without invoice_id:', req.body);
@@ -56,6 +74,8 @@ class PaymentRoutes {
             }
 
             const paymentLink = `${process.env.FRONTEND_URL}/${invoice_id}`;
+
+            products
 
             const newInvoice = {
                 total,
@@ -149,6 +169,50 @@ class PaymentRoutes {
             console.log(`Retrieved data for invoice_id ${invoice_id}:`, invoice);
             return res.status(200).json(invoice);
         });
+
+        this.app.post('/api/smilepay/pay', async (req, res)=>{
+            const dataId = req.body.Data_id;
+            const smseid = req.body.Smseid;
+            const amount = req.body.Amount;
+
+            const midSmilePayCorrect = getMidSmilePay(dataId, amount, smseid);
+            const midSmilePayReceived = req.body.Mid_smilepay;
+
+            if (!midSmilePayReceived) {
+                console.log('Mid_smilepay verification failed. Missing Mid_smilepay in request body');
+                return res.status(400).send('Mid_smilepay verification failed');
+            }
+
+            if (midSmilePayCorrect != midSmilePayReceived) {
+                console.log('Mid_smilepay verification failed. Received:', midSmilePayReceived, 'Expected:', midSmilePayCorrect);
+                return res.status(400).send('Mid_smilepay verification failed');
+            }
+
+            try{
+                this.invoiceManager.deleteInvoice(dataId);
+            }
+            catch(err){
+                console.error(`Invoice ${dataId} not found.`);
+                return res.status(500).send(`Failed to delete invoice, invoice ${dataId} not found`);
+            }
+            
+            
+            try {
+                await axios.post(process.env.PAYMENTER_WEBHOOK_URL, {}, {
+                    headers: {
+                        'x-api-key': process.env.PAYMENTER_WEBHOOK_API_KEY,
+                        'x-order-id': dataId
+                    }
+                });
+            } catch (error) {
+                console.error('Error sending webhook notification:', error);
+                res.status(500).send('Invoice deleted but failed to send webhook notification');
+                return;
+            }
+
+            console.log(`Invoice ID ${dataId} deleted successfully.`);
+            return res.status(200).send("<Roturlstatus>SmilepayPaid</Roturlstatus>");
+        })
     }
 }
 
