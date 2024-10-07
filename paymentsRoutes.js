@@ -173,7 +173,7 @@ class PaymentRoutes {
         this.app.post('/api/smilepay/pay', async (req, res)=>{
             const dataId = req.body.Data_id;
             const smseid = req.body.Smseid;
-            const amount = req.body.Amount;
+            const amount = req.body.Purchamt;
             const merchantParam = process.env.MERCHANT_PARAM;
 
             const midSmilePayCorrect = getMidSmilePay(merchantParam, amount, smseid);
