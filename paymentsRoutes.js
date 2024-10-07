@@ -174,8 +174,9 @@ class PaymentRoutes {
             const dataId = req.body.Data_id;
             const smseid = req.body.Smseid;
             const amount = req.body.Amount;
+            const merchantParam = process.env.MERCHANT_PARAM;
 
-            const midSmilePayCorrect = getMidSmilePay(dataId, amount, smseid);
+            const midSmilePayCorrect = getMidSmilePay(merchantParam, amount, smseid);
             const midSmilePayReceived = req.body.Mid_smilepay;
 
             if (!midSmilePayReceived) {
