@@ -8,29 +8,13 @@ const path = require('path');
  * @property {number} total - Total amount of the invoice
  * @property {object[]} products - List of products in the invoice
  * @property {string} invoice_id - Unique identifier for the invoice
- * @property {string} payment_link - Payment link for the invoice
- * @property {import('./paymentRequest').PaymentInfo} [payment_info]
- * @property {string|null} [payment_info_generated_time] - Time when payment info was set
+ * @property {string} paymentLink - Payment link for the invoice
+ * @property {string} code - Payment code for the invoice
+ * @property {number|null} convenience_store - Convenience store for payment
+ * @property {string|null} store_set_time - Time when convenience store was set
  * @property {string} name - Name of the customer
  * @property {string} email - Email of the customer
  */
-
-/**
- * @typedef {Object} PaymentRequestInvoiceArgument
- * @property {number} total - Total amount of the invoice
- * @property {string} invoice_id - Unique identifier for the invoice
- * @property {number} [convenience_store] - Convenience store for payment
- * @property {number} payment_method
- * @property {string} name - Name of the customer
- * @property {string} email - Email of the customer
- */
-
-/**
- * @typedef {Object} InvoiceUpdateArgument
- * @property {import('./paymentRequest').PaymentInfo} payment_info
- * @property {string|null} payment_info_generated_time - Time when convenience store was set
- */
-
 
 class InvoiceManager {
     /**
@@ -106,7 +90,7 @@ class InvoiceManager {
     /**
      * Updates an existing invoice.
      * @param {string} invoice_id - The ID of the invoice to update.
-     * @param {InvoiceUpdateArgument} updates - The fields to update.
+     * @param {Partial<Invoice>} updates - The fields to update.
      */
     updateInvoice(invoice_id, updates) {
         if (this.invoiceMap[invoice_id]) {

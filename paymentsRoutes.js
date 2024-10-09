@@ -6,8 +6,6 @@ const PaymentRequest = require('./paymentRequest');
 const { getMidSmilePay } = require('./utils');
 const { default: axios } = require('axios');
 const InvoiceManager = require('./invoiceManager');
-const convinientStores = require('./convinientStores');
-const paymentMethods = require('./paymentMethods');
 require('dotenv').config();
 
 /** @typedef {import('express').Application} ExpressApp */
@@ -17,14 +15,18 @@ class PaymentRoutes {
     app;
     /** @type {import('./invoiceManager')} */
     invoiceManager;
+    /** @type {import('./convinientStores').convinientStores} */
+    convinientStores;
     /**
      * Creates an instance of PaymentRoutes.
      * @param {ExpressApp} app - The Express app instance.
      * @param {InvoiceManager} invoiceManager - The InvoiceManager instance.
+     * @param {import('./convinientStores')} convinientStores - The object containing allowed convenience stores.
      */
-    constructor(app, invoiceManager) {
+    constructor(app, invoiceManager, convinientStores) {
         this.app = app;
         this.invoiceManager = invoiceManager;
+        this.convinientStores = convinientStores;
         this.setupRoutes();
     }
 
@@ -42,7 +44,11 @@ class PaymentRoutes {
         this.app.use('/pay', cors(corsOptions));
         this.app.use('/api/smilepay/pay', bodyParser.urlencoded({ extended: true }));
 
-        // @ts-ignore
+        /**
+         * @route POST /pay
+         * @desc Creates a new payment link for an invoice.
+         * @access Public
+         */
         this.app.post('/pay', (req, res) => {
             /** @type {InvoiceManager.Invoice} */
             const requestBody = req.body;
@@ -64,21 +70,22 @@ class PaymentRoutes {
             const existingInvoice = this.invoiceManager.getInvoice(invoice_id);
             if (existingInvoice) {
                 console.log(`Invoice ID ${invoice_id} already exists. Returning existing paymentLink.`);
-                return res.status(200).json({ paymentLink: existingInvoice.payment_link });
+                return res.status(200).json({ paymentLink: existingInvoice.paymentLink });
             }
 
             const paymentLink = `${process.env.FRONTEND_URL}/${invoice_id}`;
 
             products
 
-            /** @type {import('./invoiceManager').Invoice} */
             const newInvoice = {
                 total,
                 products,
                 invoice_id,
                 name,
                 email,
-                payment_link: paymentLink
+                paymentLink,
+                convenience_store: null,
+                store_set_time: null
             };
 
             this.invoiceManager.addInvoice(newInvoice);
@@ -86,49 +93,49 @@ class PaymentRoutes {
             return res.status(200).json({ paymentLink });
         });
 
-        // @ts-ignore
+        /**
+         * @route PUT /pay
+         * @desc Updates the convenience store for an invoice.
+         * @access Public
+         */
         this.app.put('/pay', async (req, res) => {
-            const { invoice_id, convenience_store, payment_method } = req.body;
+            const { invoice_id, convenience_store } = req.body;
 
-            if (!invoice_id || !convenience_store || !payment_method) {
+            if (!invoice_id || !convenience_store) {
                 console.log('Received PUT /pay request with missing fields:', req.body);
-                return res.status(400).json({ error: 'Missing invoice_id or convenience_store or payment_method' });
+                return res.status(400).json({ error: 'Missing invoice_id or convenience_store' });
             }
 
-            if (!convinientStores.hasOwnProperty(convenience_store)) {
+            if (!this.convinientStores.hasOwnProperty(convenience_store)) {
                 console.log(`Invalid convenience_store: ${convenience_store}`);
                 return res.status(400).json({ error: 'Invalid convenience_store' });
             }
 
-            /** @type {InvoiceManager.Invoice | null} */
+            /** @type {import('./invoiceManager').Invoice} */
             let invoice = this.invoiceManager.getInvoice(invoice_id);
-
             if (!invoice) {
                 console.log(`Invoice ID ${invoice_id} does not exist.`);
                 return res.status(404).json({ error: 'Invoice not found' });
             }
 
-            /** @type {InvoiceManager.PaymentRequestInvoiceArgument} */
-            let prInvoiceArgumenet = {
-                ...invoice,
-                payment_method : paymentMethods[payment_method],
-                convenience_store : convinientStores[convenience_store]
+            if (invoice.convenience_store) {
+                console.log(`Invoice ID ${invoice_id} already has a convenience_store set.`);
+                return res.status(403).json({ error: 'Convenience_store has already been set and cannot be changed' });
             }
 
-            /** @type {import('./paymentRequest').PaymentInfo} */
-            let paymentInfo;
+            let code;
             try{
-                paymentInfo = await (new PaymentRequest(prInvoiceArgumenet)).usePaymentMethod();
+                code = await (new PaymentRequest(invoice)).generatePaymentCode(this.convinientStores[convenience_store]);
             }
             catch(err){
-                console.error('Error using payment method:', err);
-                return res.status(500).json({ error: 'Error using payment method' });
+                console.error('Error generating payment code:', err);
+                return res.status(500).json({ error: 'Error generating payment code' });
             }
             
-            /** @type {InvoiceManager.InvoiceUpdateArgument} */
             let updates = {
-                payment_info: paymentInfo,
-                payment_info_generated_time: new Date().toISOString()
+                convenience_store: convenience_store,
+                store_set_time: new Date().toISOString(),
+                code
             };
             this.invoiceManager.updateInvoice(invoice_id, updates);
 
@@ -136,7 +143,12 @@ class PaymentRoutes {
             return res.status(200).json({ status: 'convenience_store updated successfully' });
         });
 
-        // @ts-ignore
+
+        /**
+         * @route GET /pay/:invoice_id
+         * @desc Retrieves the invoice data for a given invoice_id.
+         * @access Public
+         */
         this.app.get('/pay/:invoice_id', (req, res) => {
             const { invoice_id } = req.params;
 
@@ -145,28 +157,24 @@ class PaymentRoutes {
                 return res.status(400).json({ error: 'Missing invoice_id' });
             }
 
-            let invoice = this.invoiceManager.getInvoice(invoice_id);
+            const invoice = this.invoiceManager.getInvoice(invoice_id);
             if (!invoice) {
                 console.log(`Invoice ID ${invoice_id} does not exist.`);
                 return res.status(404).json({ error: 'Invoice not found' });
             }
 
-            
-            // @ts-ignore
             delete invoice.name;
-            // @ts-ignore
             delete invoice.email;
 
             console.log(`Retrieved data for invoice_id ${invoice_id}:`, invoice);
             return res.status(200).json(invoice);
         });
 
-        // @ts-ignore
         this.app.post('/api/smilepay/pay', async (req, res)=>{
             const dataId = req.body.Data_id;
             const smseid = req.body.Smseid;
             const amount = req.body.Purchamt;
-            const merchantParam = process.env.MERCHANT_PARAM || "";
+            const merchantParam = process.env.MERCHANT_PARAM;
 
             const midSmilePayCorrect = getMidSmilePay(merchantParam, amount, smseid);
             const midSmilePayReceived = req.body.Mid_smilepay;
@@ -191,7 +199,7 @@ class PaymentRoutes {
             
             
             try {
-                await axios.post((process.env.PAYMENTER_WEBHOOK_URL || ""), {}, {
+                await axios.post(process.env.PAYMENTER_WEBHOOK_URL, {}, {
                     headers: {
                         'x-api-key': process.env.PAYMENTER_WEBHOOK_API_KEY,
                         'x-order-id': dataId
