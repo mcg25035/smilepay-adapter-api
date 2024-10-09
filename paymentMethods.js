@@ -8,7 +8,7 @@
 
 /** @type {paymentMethods} */
 module.exports = {
-    "ConvenienceStoreCode": 1,
-    "WebATM": 2
+    "ConvenienceStoreCode": "ConvenienceStoreCode",
+    "WebATM": "WebATM"
 }
 // File /paymentMethod.js end

@@ -14,7 +14,7 @@ app.use(express.json());
 
 const DATA_FILE = path.join(__dirname, 'invoices.json');
 const invoiceManager = new InvoiceManager(DATA_FILE);
-const paymentRoutes = new PaymentRoutes(app, invoiceManager, convinientStores);
+const paymentRoutes = new PaymentRoutes(app, invoiceManager);
 app.listen(port, () => {
     console.log(`SmilePay Adapter API listening at http://localhost:${port}`);
 });
