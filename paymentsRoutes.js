@@ -6,6 +6,8 @@ const PaymentRequest = require('./paymentRequest');
 const { getMidSmilePay } = require('./utils');
 const { default: axios } = require('axios');
 const InvoiceManager = require('./invoiceManager');
+const convinientStores = require('./convinientStores');
+const paymentMethods = require('./paymentMethods');
 require('dotenv').config();
 
 /** @typedef {import('express').Application} ExpressApp */
@@ -15,18 +17,14 @@ class PaymentRoutes {
     app;
     /** @type {import('./invoiceManager')} */
     invoiceManager;
-    /** @type {import('./convinientStores').convinientStores} */
-    convinientStores;
     /**
      * Creates an instance of PaymentRoutes.
      * @param {ExpressApp} app - The Express app instance.
      * @param {InvoiceManager} invoiceManager - The InvoiceManager instance.
-     * @param {import('./convinientStores')} convinientStores - The object containing allowed convenience stores.
      */
-    constructor(app, invoiceManager, convinientStores) {
+    constructor(app, invoiceManager) {
         this.app = app;
         this.invoiceManager = invoiceManager;
-        this.convinientStores = convinientStores;
         this.setupRoutes();
     }
 
@@ -97,7 +95,7 @@ class PaymentRoutes {
                 return res.status(400).json({ error: 'Missing invoice_id or convenience_store or payment_method' });
             }
 
-            if (!this.convinientStores.hasOwnProperty(convenience_store)) {
+            if (!convinientStores.hasOwnProperty(convenience_store)) {
                 console.log(`Invalid convenience_store: ${convenience_store}`);
                 return res.status(400).json({ error: 'Invalid convenience_store' });
             }
@@ -113,8 +111,8 @@ class PaymentRoutes {
             /** @type {InvoiceManager.PaymentRequestInvoiceArgument} */
             let prInvoiceArgumenet = {
                 ...invoice,
-                payment_method : payment_method,
-                convenience_store : this.convinientStores[convenience_store]
+                payment_method : paymentMethods[payment_method],
+                convenience_store : convinientStores[convenience_store]
             }
 
             /** @type {import('./paymentRequest').PaymentInfo} */
