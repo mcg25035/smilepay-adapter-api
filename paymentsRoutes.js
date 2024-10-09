@@ -94,7 +94,7 @@ class PaymentRoutes {
 
             if (!invoice_id || !convenience_store || !payment_method) {
                 console.log('Received PUT /pay request with missing fields:', req.body);
-                return res.status(400).json({ error: 'Missing invoice_id or convenience_store' });
+                return res.status(400).json({ error: 'Missing invoice_id or convenience_store or payment_method' });
             }
 
             if (!this.convinientStores.hasOwnProperty(convenience_store)) {

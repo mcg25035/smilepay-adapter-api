@@ -53,7 +53,7 @@ class PaymentRequest {
         /** @type {PaymentInfo} */
         let paymentInfo = {};
 
-        if (this.paymentMethod == paymentMethods.ConvinientStoreCode) {
+        if (this.paymentMethod == paymentMethods.ConvenienceStoreCode) {
             paymentInfo.method = this.paymentMethod;
             paymentInfo.code = await this.generatePaymentCode(this.convinientStore);
             return paymentInfo;
