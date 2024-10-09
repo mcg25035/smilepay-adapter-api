@@ -114,7 +114,7 @@ class PaymentRoutes {
             let prInvoiceArgumenet = {
                 ...invoice,
                 payment_method : payment_method,
-                convenience_store : convenience_store
+                convenience_store : this.convinientStores[convenience_store]
             }
 
             /** @type {import('./paymentRequest').PaymentInfo} */
