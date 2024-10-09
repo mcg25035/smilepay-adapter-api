@@ -3,45 +3,79 @@
 const { default: axios } = require('axios');
 const { response } = require('express');
 const { promisesParser } = require('./utils');
+const paymentMethods = require('./paymentMethods');
+const convinientStores = require('./convinientStores');
+const PaymentMethodNotFoundException = require('./exceptions/paymentMethodNotFoundException');
+const ConvenientStoreNotFoundException = require('./exceptions/convinientStoreNotFoundException');
 
 require('dotenv').config(); // Load environment variables
 
+/**
+ * @typedef {Object} BankInfo
+ * @property {string} bank - The bank code of the payment.
+ * @property {string} account - The bank account of the payment.
+ */
+
+/**
+ * @typedef {Object} PaymentInfo
+ * @property {number} method - The payment method to use.
+ * @property {string} [code] - The payment code of convinient store.
+ * @property {BankInfo} [bank] - The bank info of the payment. 
+ */
+
 class PaymentRequest {
     /** @type {string} */
-    dcvc;
+    purName;
     /** @type {string} */
-    rvg2c;
-    /** @type {string} */
-    verify_key;
-    /** @type {string} */
-    pur_name;
-    /** @type {string} */
-    mobile_number;
+    mobileNumber;
     /** @type {string} */
     email;
     /** @type {number} */
     convinientStore;
-    /** @type {string} */
-    roturl;
-    /** @type {string} */
-    roturl_status;
+    /** @type {number} */
+    paymentMethod;
 
-    /** @param {import('./invoiceManager').Invoice} invoice - The invoice object.*/
+    /** @param {import('./invoiceManager').InvoicePaymentMethodParam} invoice - The invoice object.*/
     constructor(invoice) {
         this.invoice = invoice;
-        // Static parameters
         this.pur_name = invoice.name;
-        this.mobile_number = '--';
+        this.mobileNumber = '--';
         this.email = invoice.email;
-        this.convinientStore = invoice.convenience_store;
+        this.convinientStore = invoice.convenienceStore;
+        this.paymentMethod = invoice.paymentMethod;
+    }
+
+    /**
+     * Sets the payment method to use.
+     * @returns {Promise<PaymentInfo>} The payment information.
+     */
+    async usePaymentMethod() {
+        /** @type {PaymentInfo} */
+        let paymentInfo = {};
+
+        if (this.paymentMethod == paymentMethods.ConvinientStoreCode) {
+            paymentInfo.method = this.paymentMethod;
+            paymentInfo.code = await this.generatePaymentCode(this.convinientStore);
+            return paymentInfo;
+        } 
+
+        if (this.paymentMethod == paymentMethods.WebATM) {
+            paymentInfo.method = this.paymentMethod;
+            paymentInfo.bank = await this.generateBankInfo();
+            return paymentInfo;
+        }
+
+        throw new PaymentMethodNotFoundException('Payment method not found');
     }
 
     /**
      * Generates the payment code from SmilePay API
-     * @param {number} payZg - The convinient store code.
+     * @param {number} convinientStore - The convinient store code.
      * @returns {string} The constructed payment code.
      */
-    async generatePaymentCode(payZg) {
+    async generatePaymentCode(convinientStore) {
+        if (Pay_zg == null) throw new ConvenientStoreNotFoundException('Convinient store not found');
+
         const Dcvc = process.env.DCVC;
         const Rvg2c = process.env.RVG2C;
         const Verify_key = process.env.VERIFY_KEY;
@@ -49,12 +83,13 @@ class PaymentRequest {
         const Roturl = `${process.env.SELF_URL}/api/smilepay/pay`;
         const Roturl_status = "SmilepayPaid";
         const Od_sob = encodeURIComponent(`${Od_sob_prefix}${this.invoice.invoice_id}`);
-        const Pay_zg = payZg;
+        const Pay_zg = convinientStore;
         const Data_id = this.invoice.invoice_id;
         const Amount = this.invoice.total;
-        const Pur_name = this.pur_name;
-        const Mobile_number = this.mobile_number;
+        const Pur_name = this.purName;
+        const Mobile_number = this.mobileNumber;
         const Email = this.email;
+
 
         const url = `https://ssl.smse.com.tw/api/SPPayment.asp?Dcvc=${Dcvc}&Rvg2c=${Rvg2c}&Verify_key=${Verify_key}&Od_sob=${Od_sob}&Pay_zg=${Pay_zg}&Amount=${Amount}&Pur_name=${Pur_name}&Mobile_number=${Mobile_number}&Email=${Email}&Roturl=${Roturl}&Roturl_status=${Roturl_status}&Data_id=${Data_id}`;
         try {
@@ -69,6 +104,45 @@ class PaymentRequest {
             throw new Error('Failed to generate payment code');
         } catch (error) {
             console.error('Error generating payment code:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Generates the bank info from SmilePay API
+     * @returns {BankInfo} The constructed bank info.
+     */
+    async generateBankInfo() {
+        const Dcvc = process.env.DCVC;
+        const Rvg2c = process.env.RVG2C;
+        const Verify_key = process.env.VERIFY_KEY;
+        const Od_sob_prefix = process.env.OD_SOB_PREFIX;
+        const Roturl = `${process.env.SELF_URL}/api/smilepay/pay`;
+        const Roturl_status = "SmilepayPaid";
+        const Od_sob = encodeURIComponent(`${Od_sob_prefix}${this.invoice.invoice_id}`);
+        const Pay_zg = 2;
+        const Data_id = this.invoice.invoice_id;
+        const Amount = this.invoice.total;
+        const Pur_name = this.purName;
+        const Mobile_number = this.mobileNumber;
+        const Email = this.email;
+
+        const url = `https://ssl.smse.com.tw/api/SPPayment.asp?Dcvc=${Dcvc}&Rvg2c=${Rvg2c}&Verify_key=${Verify_key}&Od_sob=${Od_sob}&Pay_zg=${Pay_zg}&Amount=${Amount}&Pur_name=${Pur_name}&Mobile_number=${Mobile_number}&Email=${Email}&Roturl=${Roturl}&Roturl_status=${Roturl_status}&Data_id=${Data_id}`;
+        try {
+            const response = await axios.get(url);
+            const xmlData = response.data;
+            let xmlReceived = await promisesParser(xmlData);
+
+            /** @type {BankInfo} */
+            let result = {};
+
+            result.bank = xmlReceived?.SmilePay?.AtmBankNo;
+            result.account = xmlReceived?.SmilePay?.AtmNo;
+
+            if (!result.bank || !result.account) throw new Error('Failed to generate bank info');
+            return result;
+        } catch (error) {
+            console.error('Error generating bank info:', error);
             throw error;
         }
     }

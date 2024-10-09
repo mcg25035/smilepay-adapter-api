@@ -99,9 +99,9 @@ class PaymentRoutes {
          * @access Public
          */
         this.app.put('/pay', async (req, res) => {
-            const { invoice_id, convenience_store } = req.body;
+            const { invoice_id, convenience_store, payment_method } = req.body;
 
-            if (!invoice_id || !convenience_store) {
+            if (!invoice_id || !convenience_store || !payment_method) {
                 console.log('Received PUT /pay request with missing fields:', req.body);
                 return res.status(400).json({ error: 'Missing invoice_id or convenience_store' });
             }
@@ -111,31 +111,25 @@ class PaymentRoutes {
                 return res.status(400).json({ error: 'Invalid convenience_store' });
             }
 
-            /** @type {import('./invoiceManager').Invoice} */
-            let invoice = this.invoiceManager.getInvoice(invoice_id);
-            if (!invoice) {
-                console.log(`Invoice ID ${invoice_id} does not exist.`);
-                return res.status(404).json({ error: 'Invoice not found' });
-            }
+            /** @type {InvoiceManager.PaymentRequestInvoiceArgument} */
+            let PRInvoiceArgument = this.invoiceManager.getInvoice(invoice_id);
 
-            if (invoice.convenience_store) {
-                console.log(`Invoice ID ${invoice_id} already has a convenience_store set.`);
-                return res.status(403).json({ error: 'Convenience_store has already been set and cannot be changed' });
-            }
+            PRInvoiceArgument.paymentMethod = payment_method;
+            PRInvoiceArgument.convenienceStore = convenience_store;
 
-            let code;
+            let paymentInfo;
             try{
-                code = await (new PaymentRequest(invoice)).generatePaymentCode(this.convinientStores[convenience_store]);
+                paymentInfo = await (new PaymentRequest(PRInvoiceArgument)).usePaymentMethod(payment_method);
             }
             catch(err){
-                console.error('Error generating payment code:', err);
-                return res.status(500).json({ error: 'Error generating payment code' });
+                console.error('Error using payment method:', err);
+                return res.status(500).json({ error: 'Error using payment method' });
             }
             
+            /** @type {InvoiceManager.InvoiceUpdateArgument} */
             let updates = {
-                convenience_store: convenience_store,
-                store_set_time: new Date().toISOString(),
-                code
+                paymentInfo,
+                paymentInfoGeneratedTime: new Date().toISOString()
             };
             this.invoiceManager.updateInvoice(invoice_id, updates);
 

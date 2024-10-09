@@ -11,6 +11,6 @@
  */
 module.exports = {
     "SevenEleven": 4,
-    "FamilyMart": 6,
+    "FamilyMart": 6
 }
 // File /convinientStores.js end
