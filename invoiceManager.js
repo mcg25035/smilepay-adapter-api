@@ -8,9 +8,9 @@ const path = require('path');
  * @property {number} total - Total amount of the invoice
  * @property {object[]} products - List of products in the invoice
  * @property {string} invoice_id - Unique identifier for the invoice
- * @property {string} paymentLink - Payment link for the invoice
- * @property {import('./paymentRequest').PaymentInfo} paymentInfo
- * @property {string|null} paymentInfoGeneratedTime - Time when payment info was set
+ * @property {string} payment_link - Payment link for the invoice
+ * @property {import('./paymentRequest').PaymentInfo} [payment_info]
+ * @property {string|null} [payment_info_generated_time] - Time when payment info was set
  * @property {string} name - Name of the customer
  * @property {string} email - Email of the customer
  */
@@ -19,16 +19,16 @@ const path = require('path');
  * @typedef {Object} PaymentRequestInvoiceArgument
  * @property {number} total - Total amount of the invoice
  * @property {string} invoice_id - Unique identifier for the invoice
- * @property {number|null} [convenienceStore] - Convenience store for payment
- * @property {number|null} paymentMethod
+ * @property {number} [convenience_store] - Convenience store for payment
+ * @property {number} payment_method
  * @property {string} name - Name of the customer
  * @property {string} email - Email of the customer
  */
 
 /**
  * @typedef {Object} InvoiceUpdateArgument
- * @property {import('./paymentRequest').PaymentInfo} paymentInfo
- * @property {string|null} paymentInfoGeneratedTime - Time when convenience store was set
+ * @property {import('./paymentRequest').PaymentInfo} payment_info
+ * @property {string|null} payment_info_generated_time - Time when convenience store was set
  */
 
 

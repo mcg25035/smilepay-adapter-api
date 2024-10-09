@@ -30,19 +30,19 @@ class PaymentRequest {
     mobileNumber;
     /** @type {string} */
     email;
-    /** @type {number} */
+    /** @type {number | undefined} */
     convinientStore;
     /** @type {number} */
     paymentMethod;
 
-    /** @param {import('./invoiceManager').InvoicePaymentMethodParam} invoice - The invoice object.*/
+    /** @param {import('./invoiceManager').PaymentRequestInvoiceArgument} invoice - The invoice object.*/
     constructor(invoice) {
         this.invoice = invoice;
         this.pur_name = invoice.name;
         this.mobileNumber = '--';
         this.email = invoice.email;
-        this.convinientStore = invoice.convenienceStore;
-        this.paymentMethod = invoice.paymentMethod;
+        this.convinientStore = invoice.convenience_store;
+        this.paymentMethod = invoice.payment_method;
     }
 
     /**
@@ -70,11 +70,11 @@ class PaymentRequest {
 
     /**
      * Generates the payment code from SmilePay API
-     * @param {number} convinientStore - The convinient store code.
-     * @returns {string} The constructed payment code.
+     * @param {number | undefined} convinientStore - The convinient store code.
+     * @returns {Promise<string>} The constructed payment code.
      */
     async generatePaymentCode(convinientStore) {
-        if (Pay_zg == null) throw new ConvenientStoreNotFoundException('Convinient store not found');
+        if (convinientStore == null) throw new ConvenientStoreNotFoundException('Convinient store not found');
 
         const Dcvc = process.env.DCVC;
         const Rvg2c = process.env.RVG2C;
@@ -110,7 +110,7 @@ class PaymentRequest {
 
     /**
      * Generates the bank info from SmilePay API
-     * @returns {BankInfo} The constructed bank info.
+     * @returns {Promise<BankInfo>} The constructed bank info.
      */
     async generateBankInfo() {
         const Dcvc = process.env.DCVC;
