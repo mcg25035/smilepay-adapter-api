@@ -143,6 +143,7 @@ class PaymentRoutes {
                 payment_method: payment_method,
                 payment_method_set_time: new Date().toISOString(),
                 products: invoice.products,
+                total: invoice.total,
                 code
             };
             console.log(updates);
