@@ -125,7 +125,7 @@ class PaymentRoutes {
                 /** @type {string} */
                 let productName = product.name;
                 if (!productName.includes("SmilePay手續費")) return;
-                product.price = payment_method == 2 ? 13 : 35;
+                product.price = payment_method == "ATM" ? 13 : 35;
                 invoice.total += product.price;
                 product.name = "SmilePay手續費";
             });
