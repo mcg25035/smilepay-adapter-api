@@ -15,18 +15,18 @@ class PaymentRoutes {
     app;
     /** @type {import('./invoiceManager')} */
     invoiceManager;
-    /** @type {import('./convinientStores').convinientStores} */
-    convinientStores;
+    /** @type {import('./paymentMethods').paymentMethods} */
+    paymentMethods;
     /**
      * Creates an instance of PaymentRoutes.
      * @param {ExpressApp} app - The Express app instance.
      * @param {InvoiceManager} invoiceManager - The InvoiceManager instance.
-     * @param {import('./convinientStores')} convinientStores - The object containing allowed convenience stores.
+     * @param {import('./paymentMethods')} paymentMethods - The object containing allowed payment methods.
      */
-    constructor(app, invoiceManager, convinientStores) {
+    constructor(app, invoiceManager, paymentMethods) {
         this.app = app;
         this.invoiceManager = invoiceManager;
-        this.convinientStores = convinientStores;
+        this.paymentMethods = paymentMethods;
         this.setupRoutes();
     }
 
@@ -84,8 +84,8 @@ class PaymentRoutes {
                 name,
                 email,
                 paymentLink,
-                convenience_store: null,
-                store_set_time: null
+                payment_method: null,
+                payment_method_set_time: null
             };
 
             this.invoiceManager.addInvoice(newInvoice);
@@ -95,20 +95,20 @@ class PaymentRoutes {
 
         /**
          * @route PUT /pay
-         * @desc Updates the convenience store for an invoice.
+         * @desc Updates the payment method for an invoice.
          * @access Public
          */
         this.app.put('/pay', async (req, res) => {
-            const { invoice_id, convenience_store } = req.body;
+            const { invoice_id, payment_method } = req.body;
 
-            if (!invoice_id || !convenience_store) {
+            if (!invoice_id || !payment_method) {
                 console.log('Received PUT /pay request with missing fields:', req.body);
-                return res.status(400).json({ error: 'Missing invoice_id or convenience_store' });
+                return res.status(400).json({ error: 'Missing invoice_id or payment_method' });
             }
 
-            if (!this.convinientStores.hasOwnProperty(convenience_store)) {
-                console.log(`Invalid convenience_store: ${convenience_store}`);
-                return res.status(400).json({ error: 'Invalid convenience_store' });
+            if (!this.paymentMethods.hasOwnProperty(payment_method)) {
+                console.log(`Invalid payment_method: ${payment_method}`);
+                return res.status(400).json({ error: 'Invalid payment_method' });
             }
 
             /** @type {import('./invoiceManager').Invoice} */
@@ -118,14 +118,14 @@ class PaymentRoutes {
                 return res.status(404).json({ error: 'Invoice not found' });
             }
 
-            if (invoice.convenience_store) {
-                console.log(`Invoice ID ${invoice_id} already has a convenience_store set.`);
-                return res.status(403).json({ error: 'Convenience_store has already been set and cannot be changed' });
+            if (invoice.payment_method) {
+                console.log(`Invoice ID ${invoice_id} already has a payment_method set.`);
+                return res.status(403).json({ error: 'payment_method has already been set and cannot be changed' });
             }
 
             let code;
             try{
-                code = await (new PaymentRequest(invoice)).generatePaymentCode(this.convinientStores[convenience_store]);
+                code = await (new PaymentRequest(invoice)).generatePaymentCode(this.paymentMethods[payment_method]);
             }
             catch(err){
                 console.error('Error generating payment code:', err);
@@ -133,14 +133,14 @@ class PaymentRoutes {
             }
             
             let updates = {
-                convenience_store: convenience_store,
-                store_set_time: new Date().toISOString(),
+                payment_method: payment_method,
+                payment_method_set_time: new Date().toISOString(),
                 code
             };
             this.invoiceManager.updateInvoice(invoice_id, updates);
 
-            console.log(`Updated convenience_store for invoice_id ${invoice_id} to ${convenience_store}.`);
-            return res.status(200).json({ status: 'convenience_store updated successfully' });
+            console.log(`Updated payment_method for invoice_id ${invoice_id} to ${payment_method}.`);
+            return res.status(200).json({ status: 'payment_method updated successfully' });
         });
 
 

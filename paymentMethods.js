@@ -1,14 +1,18 @@
-// File /paymentMethod.js start
+// File /paymentMethods.js start
 /**
  * @typedef {Object} paymentMethods
- * @property {number} ConvenienceStoreCode - 超商代碼繳費
- * @property {number} WebATM - 虛擬銀行帳號代收
+ * @property {2} ATM - ATM
+ * @property {4} SevenEleven - 7-11
+ * @property {6} FamilyMart - 全家
  * @property {function(string): boolean} hasOwnProperty
  */
 
-/** @type {paymentMethods} */
+/**
+ * @type {paymentMethods}
+ */
 module.exports = {
-    "ConvenienceStoreCode": "ConvenienceStoreCode",
-    "WebATM": "WebATM"
+    "ATM": 2,
+    "SevenEleven": 4,
+    "FamilyMart": 6
 }
-// File /paymentMethod.js end
+// File /paymentMethods.js end

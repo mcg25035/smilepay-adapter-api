@@ -20,7 +20,7 @@ class PaymentRequest {
     /** @type {string} */
     email;
     /** @type {number} */
-    convinientStore;
+    paymentMethod;
     /** @type {string} */
     roturl;
     /** @type {string} */
@@ -33,12 +33,12 @@ class PaymentRequest {
         this.pur_name = invoice.name;
         this.mobile_number = '--';
         this.email = invoice.email;
-        this.convinientStore = invoice.convenience_store;
+        this.paymentMethod = invoice.payment_method;
     }
 
     /**
      * Generates the payment code from SmilePay API
-     * @param {number} payZg - The convinient store code.
+     * @param {number} payZg - The payment method code.
      * @returns {string} The constructed payment code.
      */
     async generatePaymentCode(payZg) {
@@ -63,9 +63,12 @@ class PaymentRequest {
             let xmlReceived = await promisesParser(xmlData);
             let ibonNo = xmlReceived?.SmilePay?.IbonNo;
             let famiNo = xmlReceived?.SmilePay?.FamiNO;
+            let atmBankNo = xmlReceived?.SmilePay?.AtmBankNo;
+            let atmAccountNo = xmlReceived?.SmilePay?.AtmNo;
 
             if (ibonNo) return ibonNo[0];
             if (famiNo) return famiNo[0];
+            if (atmBankNo && atmAccountNo) return `${atmBankNo[0]}-${atmAccountNo[0]}`;
             throw new Error('Failed to generate payment code');
         } catch (error) {
             console.error('Error generating payment code:', error);

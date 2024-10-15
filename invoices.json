@@ -40,8 +40,8 @@
     ],
     "invoice_id": 22,
     "paymentLink": "https://www.youtube.com/watch?v=5mRbdtrKFy4&t=37s",
-    "convenience_store": "FamilyMart",
-    "store_set_time": "2024-10-06T15:16:45.956Z",
+    "payment_method": "FamilyMart",
+    "payment_method_set_time": "2024-10-06T15:16:45.956Z",
     "code": "24A1006B231645"
   },
   "23": {
@@ -64,8 +64,8 @@
     ],
     "invoice_id": 23,
     "paymentLink": "https://www.youtube.com/watch?v=5mRbdtrKFy4&t=37s",
-    "convenience_store": "FamilyMart",
-    "store_set_time": "2024-10-06T15:24:11.759Z",
+    "payment_method": "FamilyMart",
+    "payment_method_set_time": "2024-10-06T15:24:11.759Z",
     "code": "24A1006B232411"
   },
   "26": {
@@ -118,8 +118,8 @@
     "name": "rayray",
     "email": "ray@mcloudtw.com",
     "paymentLink": "https://www.youtube.com/watch?v=5mRbdtrKFy4&t=37s",
-    "convenience_store": "FamilyMart",
-    "store_set_time": "2024-10-06T15:31:06.912Z",
+    "payment_method": "FamilyMart",
+    "payment_method_set_time": "2024-10-06T15:31:06.912Z",
     "code": "24A1006B233106"
   }
 }
