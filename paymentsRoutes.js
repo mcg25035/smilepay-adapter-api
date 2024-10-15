@@ -121,6 +121,14 @@ class PaymentRoutes {
                 return res.status(403).json({ error: 'payment_method has already been set and cannot be changed' });
             }
 
+            invoice.products.forEach(product => {
+                /** @type {string} */
+                let productName = product.name;
+                if (!productName.includes("SmilePay手續費")) return;
+                product.price = payment_method == 2 ? 13 : 35;
+                product.name = "SmilePay手續費";
+            });
+
             let code;
             try{
                 code = await (new PaymentRequest(invoice)).generatePaymentCode(this.paymentMethods[payment_method]);
@@ -129,14 +137,6 @@ class PaymentRoutes {
                 console.error('Error generating payment code:', err);
                 return res.status(500).json({ error: 'Error generating payment code' });
             }
-       
-            invoice.products.forEach(product => {
-                /** @type {string} */
-                let productName = product.name;
-                if (!productName.includes("SmilePay手續費")) return;
-                product.price = payment_method == 2 ? 13 : 35;
-                product.name = "SmilePay手續費";
-            })
 
             let updates = {
                 payment_method: payment_method,
@@ -144,6 +144,7 @@ class PaymentRoutes {
                 products: invoice.products,
                 code
             };
+            console.log(updates);
             this.invoiceManager.updateInvoice(invoice_id, updates);
 
             console.log(`Updated payment_method for invoice_id ${invoice_id} to ${payment_method}.`);
