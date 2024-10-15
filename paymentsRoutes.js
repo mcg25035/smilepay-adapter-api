@@ -54,12 +54,10 @@ class PaymentRoutes {
             const requestBody = req.body;
             let { total, products, invoice_id, name, email } = requestBody;
 
-            total += 35;
-
             products.push({
-                "price" : 35,
+                "price" : "選擇後計算",
                 "quantity" : 1,
-                "name" : "SmilePay手續費"
+                "name" : "SmilePay手續費(超商35元 / ATM13元)"
             });
 
             if (!invoice_id) {
@@ -131,10 +129,19 @@ class PaymentRoutes {
                 console.error('Error generating payment code:', err);
                 return res.status(500).json({ error: 'Error generating payment code' });
             }
-            
+       
+            invoice.products.forEach(product => {
+                /** @type {string} */
+                let productName = product.name;
+                if (!productName.includes("SmilePay手續費")) return;
+                product.price = payment_method == 2 ? 13 : 35;
+                product.name = "SmilePay手續費";
+            })
+
             let updates = {
                 payment_method: payment_method,
                 payment_method_set_time: new Date().toISOString(),
+                products: invoice.products,
                 code
             };
             this.invoiceManager.updateInvoice(invoice_id, updates);
